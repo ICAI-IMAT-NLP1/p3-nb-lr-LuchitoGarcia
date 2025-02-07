@@ -34,12 +34,11 @@ class LogisticRegression:
         """
     
         self.weights = self.initialize_parameters(features.shape[1], self.random_state)
-        ones = torch.ones(features.shape[1], )
 
         for epoch in range(epochs):
             y_pred = self.predict_proba(features)  
             num_samples = features.shape[0]
-
+            ones = torch.ones(num_samples)
             grad_w = (features.T @ (y_pred - labels)) / num_samples 
             grad_b = ( (y_pred - labels) @ ones) / num_samples
 
@@ -47,7 +46,8 @@ class LogisticRegression:
             self.weights[-1]  -= learning_rate * grad_b
 
             loss = self.binary_cross_entropy_loss(y_pred, labels)
-            print(f"Epoch {epoch}, Loss: {loss.item()}")
+            if epoch % 10 == 0:
+                print(f"Epoch {epoch}, Loss: {loss.item()}")
 
         return
 

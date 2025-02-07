@@ -90,35 +90,40 @@ def evaluate_classification(predictions: torch.Tensor, labels: torch.Tensor) -> 
     Returns:
         dict: A dictionary containing the calculated metrics.
     """
-    metrics: Dict[str, float] = {}
-    predictions = torch.tensor([1, 0, 1, 1, 0])
-    labels = torch.tensor([1, 0, 0, 1, 1])
+    # Elimina o comenta las líneas que sobrescriben los argumentos
+    # predictions = torch.tensor([1, 0, 1, 1, 0])
+    # labels = torch.tensor([1, 0, 0, 1, 1])
+
     tp = 0
     tn = 0
     fp = 0
     fn = 0
 
     for i in range(predictions.shape[0]):
-        true = labels[i]
-        pred = predictions[i]
-        if true == pred and true:
+        true = labels[i].item()  # (mejor usar .item() o int(labels[i]))
+        pred = predictions[i].item()
+
+        if true == 1 and pred == 1:
             tp += 1
-        elif true == pred and not true:
+        elif true == 0 and pred == 0:
             tn += 1
-        elif true != pred and true:
+        elif true == 1 and pred == 0:
             fn += 1
-        elif true != pred and not true:
+        elif true == 0 and pred == 1:
             fp += 1
 
-        accuracy = (tn + tp) / (tn + tp + fn + fp)
-        precision = tp / (tp + fp)
-        recall = tp / (tp + fn)
-        f1 = 2 * precision * recall / (precision + recall)
-        metrics["accuracy"] = accuracy
-        metrics["precision"] = precision
-        metrics["recall"] = recall
-        metrics["f1_score"] = f1
+    # Ahora calculas las métricas una sola vez
+    total = tp + tn + fp + fn  # = número de muestras
+    accuracy = (tp + tn) / total if total else 0.0
 
+    # Ojo con divisiones por cero en precision y recall
+    precision = tp / (tp + fp) if (tp + fp) else 0.0
+    recall = tp / (tp + fn) if (tp + fn) else 0.0
+    f1 = (2 * precision * recall / (precision + recall)) if (precision + recall) else 0.0
 
-
-    return metrics
+    return {
+        "accuracy": accuracy,
+        "precision": precision,
+        "recall": recall,
+        "f1_score": f1
+    }
