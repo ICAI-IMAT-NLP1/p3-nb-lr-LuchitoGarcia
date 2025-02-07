@@ -90,6 +90,35 @@ def evaluate_classification(predictions: torch.Tensor, labels: torch.Tensor) -> 
     Returns:
         dict: A dictionary containing the calculated metrics.
     """
-    metrics: Dict[str, float] = None
+    metrics: Dict[str, float] = {}
+    predictions = torch.tensor([1, 0, 1, 1, 0])
+    labels = torch.tensor([1, 0, 0, 1, 1])
+    tp = 0
+    tn = 0
+    fp = 0
+    fn = 0
+
+    for i in range(predictions.shape[0]):
+        true = labels[i]
+        pred = predictions[i]
+        if true == pred and true:
+            tp += 1
+        elif true == pred and not true:
+            tn += 1
+        elif true != pred and true:
+            fn += 1
+        elif true != pred and not true:
+            fp += 1
+
+        accuracy = (tn + tp) / (tn + tp + fn + fp)
+        precision = tp / (tp + fp)
+        recall = tp / (tp + fn)
+        f1 = 2 * precision * recall / (precision + recall)
+        metrics["accuracy"] = accuracy
+        metrics["precision"] = precision
+        metrics["recall"] = recall
+        metrics["f1_score"] = f1
+
+
 
     return metrics
