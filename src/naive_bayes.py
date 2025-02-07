@@ -51,11 +51,9 @@ class NaiveBayes:
                 class_priors[label_item] = 0
             class_priors[label_item] += 1
         
-        # Divide cada contador entre N para obtener la probabilidad
         for c in class_priors:
             class_priors[c] = class_priors[c] / N
         
-        # Convertimos a torch.Tensor
         class_priors = {c: torch.tensor(p, dtype=torch.float32) for c, p in class_priors.items()}
         return class_priors
 
@@ -82,14 +80,12 @@ class NaiveBayes:
 
         for c in unique_classes:
             c_int = int(c.item())
-            # Máscara: filas que pertenecen a la clase c
+
             class_mask = (labels == c)
-            # Suma de las palabras en todas las muestras de clase c
-            class_sum = features[class_mask].sum(dim=0)  # shape = [vocab_size]
+            class_sum = features[class_mask].sum(dim=0) 
             
             total_count_for_class = class_sum.sum()
 
-            # Laplace smoothing
             probabilities = (class_sum + delta) / (total_count_for_class + delta*vocab_size)
             
             class_word_counts[c_int] = probabilities
@@ -110,18 +106,14 @@ class NaiveBayes:
         if self.conditional_probabilities is None or self.class_priors is None:
             raise ValueError("El modelo debe estar entrenado antes de estimar los posteriors.")
 
-        # Ordenamos las clases para tener un orden fijo
         sorted_classes = sorted(self.class_priors.keys())
 
         log_posteriors = []
         for c in sorted_classes:
-            # log P(y=c)
             log_prior = torch.log(self.class_priors[c])
-            # log P(w_j|c) para todas las j
             log_cond = torch.log(self.conditional_probabilities[c])
-            # Multiplicamos element-wise: feature[j] * log_cond[j], y sumamos
+
             log_likelihood = torch.sum(feature * log_cond)
-            # Posterior sin normalizar en log-espacio
             log_post = log_prior + log_likelihood
             log_posteriors.append(log_post)
 
@@ -137,7 +129,6 @@ class NaiveBayes:
         Returns:
             int: The predicted class label (0 or 1 in binary classification).
         """
-        # Obtenemos el log posterior de cada clase
         log_post = self.estimate_class_posteriors(feature)
         pred_class = torch.argmax(log_post).item()
         return pred_class
@@ -152,7 +143,6 @@ class NaiveBayes:
         Returns:
             torch.Tensor: A tensor representing the probability distribution (float) over all classes.
         """
-        # Obtenemos el log posterior de cada clase
         log_post = self.estimate_class_posteriors(feature)
         probs = torch.softmax(log_post, dim=0)
         return probs
