@@ -129,7 +129,7 @@ class NaiveBayes:
         Returns:
             int: The predicted class label (0 or 1 in binary classification).
         """
-        log_post = self.estimate_class_posteriors(feature)
+        log_post = self.predict_proba(feature)
         pred_class = torch.argmax(log_post).item()
         return pred_class
 
